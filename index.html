@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DarkInvest - Simuladores Financeiros</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <link rel="icon" type="image/png" href="imagens/favicon.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-dark px-3 py-3">
+      <div class="container-fluid">
+        <a class="navbar-brand fw-bold mb-2 mb-lg-0" href="#"
+          ><i class="fa-solid fa-chart-line text-success me-2"></i>DarkInvest</a
+        >
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="collapse navbar-collapse justify-content-end"
+          id="navbarNav"
+        >
+          <ul
+            class="nav nav-pills custom-nav-pills mt-2 mt-lg-0 gap-3"
+            id="pills-tab"
+            role="tablist"
+          >
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="tab-juros-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#tab-juros"
+                type="button"
+              >
+                Juros Compostos
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="tab-financiamento-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#tab-financiamento"
+                type="button"
+              >
+                Financiamento
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="tab-meta-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#tab-meta"
+                type="button"
+              >
+                Meta de Aporte
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="tab-tabela-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#tab-tabela"
+                type="button"
+              >
+                Cotações / Tabela
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container my-4">
+      <div class="tab-content" id="pills-tabContent">
+        <div class="tab-pane fade show active" id="tab-juros" role="tabpanel">
+          <h2 class="mb-4 fs-3">Simulador de Juros Compostos</h2>
+          <div class="row g-4">
+            <div class="col-lg-4">
+              <div class="card p-4 shadow-sm">
+                <form id="formJuros">
+                  <div class="mb-3">
+                    <label class="form-label">Valor Inicial (R$)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="jurosValorInicial"
+                      value="1000"
+                      step="0.01"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Aporte Mensal (R$)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="jurosAporteMensal"
+                      value="500"
+                      step="0.01"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label"
+                      >Taxa de Rendimento (% a.a.)</label
+                    >
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="jurosTaxa"
+                        value="10.5"
+                        step="0.01"
+                        oninput="
+                          verificarMudancaManual('jurosTaxa', 'jurosSelicInfo')
+                        "
+                        required
+                      />
+                      <button
+                        class="btn btn-outline-secondary text-light"
+                        type="button"
+                        onclick="buscarTaxaJurosAPI()"
+                      >
+                        Selic
+                      </button>
+                    </div>
+                    <small
+                      class="text-muted d-block mt-1"
+                      id="jurosSelicInfo"
+                    ></small>
+                  </div>
+                  <div class="row">
+                    <div class="col-6 mb-3">
+                      <label class="form-label">Anos</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="jurosAnos"
+                        value="5"
+                        min="0"
+                        required
+                      />
+                    </div>
+                    <div class="col-6 mb-3">
+                      <label class="form-label">Meses</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="jurosMeses"
+                        value="0"
+                        min="0"
+                        max="11"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Inflação Estimada (% a.a.)</label>
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="jurosInflacao"
+                        value="4.5"
+                        step="0.01"
+                        oninput="
+                          verificarMudancaManual(
+                            'jurosInflacao',
+                            'jurosIpcaInfo',
+                          )
+                        "
+                      />
+                      <button
+                        class="btn btn-outline-secondary text-light"
+                        type="button"
+                        onclick="buscarInflacaoAPI()"
+                      >
+                        IPCA
+                      </button>
+                    </div>
+                    <small
+                      class="text-muted d-block mt-1"
+                      id="jurosIpcaInfo"
+                    ></small>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-success w-100"
+                    onclick="calcularJuros()"
+                  >
+                    Simular
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div class="col-lg-8">
+              <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-md-4">
+                  <div class="card p-3 text-center h-100">
+                    <small class="text-muted">Valor Aportado</small>
+                    <span id="resJurosAportado" class="fs-6 fw-bold mt-1"
+                      >R$ 0,00</span
+                    >
+                  </div>
+                </div>
+                <div class="col-sm-6 col-md-4">
+                  <div class="card p-3 text-center h-100 border-warning-subtle">
+                    <small class="text-muted">Rendimento Bruto</small>
+                    <span
+                      id="resJurosRendimentoBruto"
+                      class="fs-6 fw-bold text-warning mt-1"
+                      >R$ 0,00</span
+                    >
+                  </div>
+                </div>
+                <div class="col-sm-6 col-md-4">
+                  <div class="card p-3 text-center h-100">
+                    <small class="text-muted">Valor Bruto Total</small>
+                    <span
+                      id="resJurosBruto"
+                      class="fs-6 fw-bold text-success mt-1"
+                      >R$ 0,00</span
+                    >
+                  </div>
+                </div>
+                <div class="col-sm-6 col-md-6">
+                  <div class="card p-3 text-center h-100 border-warning-subtle">
+                    <small class="text-muted">Rendimento s/ Inflação</small>
+                    <span
+                      id="resJurosRendimentoLiquido"
+                      class="fs-6 fw-bold text-warning mt-1"
+                      >R$ 0,00</span
+                    >
+                  </div>
+                </div>
+                <div class="col-sm-6 col-md-6">
+                  <div class="card p-3 text-center h-100">
+                    <small class="text-muted">Líquido (c/ Inflação)</small>
+                    <span
+                      id="resJurosLiquido"
+                      class="fs-6 fw-bold text-info mt-1"
+                      >R$ 0,00</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="card p-3 p-md-4">
+                <div class="chart-container">
+                  <canvas id="chartJuros"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-financiamento" role="tabpanel">
+          <h2 class="mb-4 fs-3">Simulador Detalhado de Financiamento</h2>
+          <div class="row g-4">
+            <div class="col-lg-4">
+              <div class="card p-4 shadow-sm">
+                <form id="formFinanciamento">
+                  <div class="mb-3">
+                    <label class="form-label">Valor do Imóvel (R$)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="finValorImovel"
+                      value="300000"
+                      step="1000"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Renda Mensal (R$)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="finRenda"
+                      value="8000"
+                      step="100"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Taxa de Juros (% a.a.)</label>
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="finTaxa"
+                        value="10.0"
+                        step="0.01"
+                        oninput="verificarMudancaManual('finTaxa', 'selicInfo')"
+                        required
+                      />
+                      <button
+                        class="btn btn-outline-secondary text-light"
+                        type="button"
+                        onclick="buscarSelic()"
+                      >
+                        Selic
+                      </button>
+                    </div>
+                    <small
+                      class="text-muted d-block mt-1"
+                      id="selicInfo"
+                    ></small>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label"
+                      >Prazo Máximo Desejado (Meses)</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="finMeses"
+                      value="360"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-success w-100 mb-4"
+                    onclick="calcularFinanciamento()"
+                  >
+                    Analisar Financiamento
+                  </button>
+                </form>
+
+                <div class="table-responsive">
+                  <h6 class="text-muted mb-3">
+                    <i class="fa-solid fa-table-list me-2"></i>Resumo
+                    Comparativo
+                  </h6>
+                  <table
+                    class="table table-dark-custom table-bordered table-sm align-middle text-center mb-0"
+                  >
+                    <thead>
+                      <tr>
+                        <th>Métrica</th>
+                        <th>PRICE</th>
+                        <th>SAC</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <span>
+                            Valor da prestação paga no primeiro mês do
+                            financiamento:
+                          </span>
+                        </td>
+                        <td id="tblPriceParcela">R$ 0,00</td>
+                        <td id="tblSacInicial">R$ 0,00</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span>
+                            Valor da prestação paga no último mês do contrato:
+                            </span
+                          >
+                        </td>
+                        <td id="tblPriceFinal">R$ 0,00</td>
+                        <td id="tblSacFinal">R$ 0,00</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span>
+                            Soma total de todos os juros pagos ao banco ao longo
+                            do prazo do empréstimo:
+                            </span
+                          >
+                        </td>
+                        <td id="tblPriceJuros">R$ 0,00</td>
+                        <td id="tblSacJuros">R$ 0,00</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span>
+                            Quantidade total de meses necessários para quitar o
+                            financiamento:
+                            </span
+                          >
+                        </td>
+                        <td id="tblPricePrazo">0</td>
+                        <td id="tblSacPrazo">0</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span>
+                            Percentual da sua renda mensal que a primeira
+                            parcela consome:
+                            </span
+                          >
+                        </td>
+                        <td id="tblPriceComp">0%</td>
+                        <td id="tblSacComp">0%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-8">
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <div class="card p-3 h-100">
+                    <h5 class="text-success border-bottom pb-2 fs-6">
+                      Sistema PRICE (Parcelas Fixas)
+                    </h5>
+                    <p class="mb-1 text-muted">
+                      1ª Parcela:
+                      <span id="resPriceParcela" class="fw-bold text-light"
+                        >R$ 0,00</span
+                      >
+                    </p>
+                    <p class="mb-1 text-muted">
+                      Última Parcela:
+                      <span id="resPriceFinal" class="fw-bold text-light"
+                        >R$ 0,00</span
+                      >
+                    </p>
+                    <p class="mb-1 text-muted">
+                      Total Juros:
+                      <span id="resPriceJuros" class="fw-bold text-light"
+                        >R$ 0,00</span
+                      >
+                    </p>
+                    <p class="mb-1 text-muted">
+                      Prazo Sugerido:
+                      <span id="resPricePrazo" class="fw-bold text-light"
+                        >0</span
+                      >
+                      meses
+                    </p>
+                    <p class="mb-0 text-muted">
+                      Comprometimento Renda:
+                      <span id="resPriceComp" class="fw-bold text-light"
+                        >0%</span
+                      >
+                    </p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card p-3 h-100">
+                    <h5 class="text-info border-bottom pb-2 fs-6">
+                      Sistema SAC (Decrescente)
+                    </h5>
+                    <p class="mb-1 text-muted">
+                      1ª Parcela:
+                      <span id="resSacInicial" class="fw-bold text-light"
+                        >R$ 0,00</span
+                      >
+                    </p>
+                    <p class="mb-1 text-muted">
+                      Última Parcela:
+                      <span id="resSacFinal" class="fw-bold text-light"
+                        >R$ 0,00</span
+                      >
+                    </p>
+                    <p class="mb-1 text-muted">
+                      Total Juros:
+                      <span id="resSacJuros" class="fw-bold text-light"
+                        >R$ 0,00</span
+                      >
+                    </p>
+                    <p class="mb-1 text-muted">
+                      Prazo Sugerido:
+                      <span id="resSacPrazo" class="fw-bold text-light">0</span>
+                      meses
+                    </p>
+                    <p class="mb-0 text-muted">
+                      Comprometimento Renda:
+                      <span id="resSacComp" class="fw-bold text-light">0%</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="card p-3 p-md-4 mb-4">
+                <h6 class="text-muted mb-3">
+                  Evolução das Parcelas ao Longo do Tempo
+                </h6>
+                <div class="chart-container">
+                  <canvas id="chartFinanciamento"></canvas>
+                </div>
+              </div>
+              <div class="card p-3 p-md-4">
+                <h6 class="text-muted mb-3">
+                  Evolução do Saldo Devedor (Dívida Restante)
+                </h6>
+                <div class="chart-container">
+                  <canvas id="chartSaldoDevedor"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-meta" role="tabpanel">
+          <h2 class="mb-4 fs-3">Calculadora de Meta de Patrimônio</h2>
+          <div class="row g-4">
+            <div class="col-lg-4">
+              <div class="card p-4 shadow-sm">
+                <form id="formMeta">
+                  <div class="mb-3">
+                    <label class="form-label"
+                      >Valor da Meta Desejada (R$)</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="metaValor"
+                      value="500000"
+                      step="1000"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label"
+                      >Valor Inicial Guardado (R$)</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="metaInicial"
+                      value="20000"
+                      step="100"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label"
+                      >Taxa de Rendimento Esperada (% a.a.)</label
+                    >
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="metaTaxa"
+                        value="10.0"
+                        step="0.01"
+                        oninput="
+                          verificarMudancaManual('metaTaxa', 'metaSelicInfo')
+                        "
+                        required
+                      />
+                      <button
+                        class="btn btn-outline-secondary text-light"
+                        type="button"
+                        onclick="buscarTaxaMetaAPI()"
+                      >
+                        Selic
+                      </button>
+                    </div>
+                    <small
+                      class="text-muted d-block mt-1"
+                      id="metaSelicInfo"
+                    ></small>
+                  </div>
+                  <div class="row">
+                    <div class="col-6 mb-3">
+                      <label class="form-label">Anos</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="metaAnos"
+                        value="10"
+                        min="0"
+                        required
+                      />
+                    </div>
+                    <div class="col-6 mb-3">
+                      <label class="form-label">Meses</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="metaMeses"
+                        value="0"
+                        min="0"
+                        max="11"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-success w-100"
+                    onclick="calcularMeta()"
+                  >
+                    Calcular Aporte Necessário
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div class="col-lg-8">
+              <div class="card p-4 mb-4 text-center">
+                <small class="text-muted">Aporte Mensal Médio Necessário</small>
+                <span id="resMetaAporte" class="highlight-value my-2"
+                  >R$ 0,00</span
+                >
+                <p class="text-muted mb-0" id="resMetaDetalhes">
+                  Insira os dados para calcular o esforço mensal necessário.
+                </p>
+              </div>
+              <div class="card p-3 p-md-4">
+                <div class="chart-container">
+                  <canvas id="chartMeta"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-tabela" role="tabpanel">
+          <h2 class="mb-4 fs-3">
+            Cotações e Indicadores de Mercado (Atualizado)
+          </h2>
+          <div class="card p-4 shadow-sm">
+            <div class="table-responsive">
+              <table class="table table-dark-custom table-striped align-middle">
+                <thead>
+                  <tr>
+                    <th>Ativo / Indicador</th>
+                    <th>Tipo</th>
+                    <th>Valor Atual</th>
+                    <th>Variação (24h)</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaAtivos"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
