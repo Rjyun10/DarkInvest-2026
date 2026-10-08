@@ -1,4 +1,5 @@
 let chartJurosInstance = null;
+let chartSimplesInstance = null;
 let chartFinInstance = null;
 let chartSaldoInstance = null;
 let chartMetaInstance = null;
@@ -117,7 +118,80 @@ function calcularJuros() {
 }
 
 // ==========================================
-// 2. SIMULADOR DE FINANCIAMENTO (PRICE vs SAC)
+// 2. SIMULADOR DE JUROS SIMPLES
+// ==========================================
+function calcularJuroSimples() {
+    let C = parseFloat(document.getElementById('simplesCapital').value) || 0;
+    let taxaAnual = (parseFloat(document.getElementById('simplesTaxa').value) || 0) / 100;
+    let anos = parseInt(document.getElementById('simplesAnos').value) || 0;
+    let meses = parseInt(document.getElementById('simplesMeses').value) || 0;
+
+    // Tempo total em anos (t = anos + meses/12)
+    let t = anos + (meses / 12);
+    let totalMeses = (anos * 12) + meses;
+
+    // J = C * i * t
+    let J = C * taxaAnual * t;
+
+    // M = C + J
+    let M = C + J;
+
+    document.getElementById('resSimplesCapital').innerText = formatarMoeda(C);
+    document.getElementById('resSimplesJuros').innerText = formatarMoeda(J);
+    document.getElementById('resSimplesMontante').innerText = formatarMoeda(M);
+
+    // Gerar pontos simples para o gráfico linear
+    let labels = ['Início'];
+    let dadosMontante = [C];
+    let dadosCapital = [C];
+
+    let passo = Math.max(1, Math.floor(totalMeses / 10));
+    for (let m = 1; m <= totalMeses; m++) {
+        if (m % passo === 0 || m === totalMeses) {
+            let tParcial = m / 12;
+            let montanteParcial = C * (1 + (taxaAnual * tParcial));
+            labels.push(`Mês ${m}`);
+            dadosMontante.push(montanteParcial);
+            dadosCapital.push(C);
+        }
+    }
+
+    const ctx = document.getElementById('chartJuroSimples').getContext('2d');
+    if (chartSimplesInstance) chartSimplesInstance.destroy();
+
+    chartSimplesInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                { 
+                    label: 'Montante Final (M = C + J)', 
+                    data: dadosMontante, 
+                    borderColor: '#00d26a', 
+                    backgroundColor: 'rgba(0,210,106,0.1)', 
+                    fill: true, 
+                    tension: 0 
+                },
+                { 
+                    label: 'Capital Inicial (C)', 
+                    data: dadosCapital, 
+                    borderColor: '#94a3b8', 
+                    borderDash: [5, 5], 
+                    fill: false 
+                }
+            ]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#f8f9fa' } } }, 
+            scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } } 
+        }
+    });
+}
+
+// ==========================================
+// 3. SIMULADOR DE FINANCIAMENTO (PRICE vs SAC)
 // ==========================================
 function calcularFinanciamento() {
     let valor = parseFloat(document.getElementById('finValorImovel').value);
@@ -261,7 +335,7 @@ function calcularFinanciamento() {
 }
 
 // ==========================================
-// 3. SIMULADOR DE META DE PATRIMÔNIO
+// 4. SIMULADOR DE META DE PATRIMÔNIO
 // ==========================================
 function calcularMeta() {
     let meta = parseFloat(document.getElementById('metaValor').value);
@@ -320,7 +394,7 @@ function calcularMeta() {
 }
 
 // ==========================================
-// 4. TABELA DE ATIVOS (COM STATUS DE ATUALIZAÇÃO)
+// 5. TABELA DE ATIVOS (COM STATUS DE ATUALIZAÇÃO)
 // ==========================================
 async function carregarTabelaAtivos() {
     let tbody = document.getElementById('tabelaAtivos');
@@ -420,6 +494,7 @@ async function carregarTabelaAtivos() {
 // Inicializar cálculos ao carregar a página
 window.onload = function() {
     calcularJuros();
+    calcularJuroSimples();
     calcularFinanciamento();
     calcularMeta();
     carregarTabelaAtivos();

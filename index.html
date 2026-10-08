@@ -53,6 +53,17 @@
             <li class="nav-item" role="presentation">
               <button
                 class="nav-link"
+                id="tab-juro-simples-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#tab-juro-simples"
+                type="button"
+              >
+                Juro Simples
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
                 id="tab-financiamento-tab"
                 data-bs-toggle="pill"
                 data-bs-target="#tab-financiamento"
@@ -270,7 +281,112 @@
             </div>
           </div>
         </div>
-
+        <div class="tab-pane fade" id="tab-juro-simples" role="tabpanel">
+          <h2 class="mb-4 fs-3">Simulador de Juros Simples</h2>
+          <div class="row g-4">
+            <div class="col-lg-4">
+              <div class="card p-4 shadow-sm">
+                <form id="formJuroSimples">
+                  <div class="mb-3">
+                    <label class="form-label">Capital Inicial (C) - R$</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="simplesCapital"
+                      value="1000"
+                      step="0.01"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Taxa de Juros (i) - % a.a.</label>
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="simplesTaxa"
+                        value="10.5"
+                        step="0.01"
+                        oninput="verificarMudancaManual('simplesTaxa', 'simplesSelicInfo')"
+                        required
+                      />
+                      <button
+                        class="btn btn-outline-secondary text-light"
+                        type="button"
+                        onclick="buscarTaxaSimplesAPI()"
+                      >
+                        Selic
+                      </button>
+                    </div>
+                    <small
+                      class="text-muted d-block mt-1"
+                      id="simplesSelicInfo"
+                    ></small>
+                  </div>
+                  <div class="row">
+                    <div class="col-6 mb-3">
+                      <label class="form-label">Anos</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="simplesAnos"
+                        value="3"
+                        min="0"
+                        required
+                      />
+                    </div>
+                    <div class="col-6 mb-3">
+                      <label class="form-label">Meses</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="simplesMeses"
+                        value="0"
+                        min="0"
+                        max="11"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-success w-100"
+                    onclick="calcularJuroSimples()"
+                  >
+                    Calcular Juros Simples
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div class="col-lg-8">
+              <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-md-4">
+                  <div class="card p-3 text-center h-100">
+                    <small class="text-muted">Capital Inicial (C)</small>
+                    <span id="resSimplesCapital" class="fs-6 fw-bold mt-1">R$ 0,00</span>
+                  </div>
+                </div>
+                <div class="col-sm-6 col-md-4">
+                  <div class="card p-3 text-center h-100 border-warning-subtle">
+                    <small class="text-muted">Total de Juros (J)</small>
+                    <span id="resSimplesJuros" class="fs-6 fw-bold text-warning mt-1">R$ 0,00</span>
+                  </div>
+                </div>
+                <div class="col-sm-6 col-md-4">
+                  <div class="card p-3 text-center h-100">
+                    <small class="text-muted">Montante Final (M)</small>
+                    <span id="resSimplesMontante" class="fs-6 fw-bold text-success mt-1">R$ 0,00</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card p-3 p-md-4">
+                <div class="chart-container">
+                  <canvas id="chartJuroSimples"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="tab-pane fade" id="tab-financiamento" role="tabpanel">
           <h2 class="mb-4 fs-3">Simulador Detalhado de Financiamento</h2>
           <div class="row g-4">
