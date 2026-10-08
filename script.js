@@ -32,6 +32,10 @@ async function buscarTaxaJurosAPI() {
     await buscarTaxaSelicGeral('jurosTaxa', 'jurosSelicInfo');
 }
 
+async function buscarSelicSimples() {
+    await buscarTaxaSelicGeral('simplesTaxa', 'simplesSelicInfo');
+}
+
 async function buscarSelic() {
     await buscarTaxaSelicGeral('finTaxa', 'selicInfo');
 }
